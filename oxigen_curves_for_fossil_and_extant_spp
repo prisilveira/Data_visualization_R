@@ -1,0 +1,245 @@
+library(ggplot2)
+library(ggpubr)
+
+data<-read.csv("data_line_plots.csv", sep=";")
+data_fossil<-read.csv("data_fossil_line_plots.csv", sep=";")
+ox<-read.csv("oxigen_curve_short.csv", sep = ",")
+head(data)
+
+ox2<-ox[,-1]
+ox2$Time<-ox$Time*-1
+head(ox2)
+
+####### fosseis ########
+
+ggplot(data_fossil, aes(x = x_values, y = ncell, group= 1)) +
+  geom_line(aes(x = x_values, y = ncell, group= 1)) + # Line plot
+  labs(x = "1000 years before present", y = "Number of cells", title = expression(italic("Fossils"))) +  # Axis labels
+  theme_bw() +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +  facet_wrap(~sp, scales = "free_y", ncol=1)
+
+######## extant ##########
+plot_data<-ggplot(data[c(1:695),], aes(x = x_values, y = ncell, group= 1)) +
+  geom_line(aes(x = x_values, y = ncell, group= 1)) + # Line plot
+  labs(x = "1000 years before present", y = "Number of cells", title = expression(italic("Extant"))) +  # Axis labels
+  theme_bw() +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +  facet_wrap(~sp, scales = "free_x", nrow =1) + coord_flip()
+
+plot_data
+
+
+
+####### Grafico vertical pra 1 espécie
+tiff("lten_vertical_plot.tif", width = 5 , height= 8, units = "cm", res = 300)
+
+plot_data +
+  # Add background gradient using dissolved oxygen data (ox2)
+  geom_tile(
+    data = ox2,
+    aes(x = Time, y = 0, fill = d18),  # Use `d18` for the color gradient
+    height = Inf,  # Extend tile vertically to cover the entire plot
+    alpha = 0.2    # Transparency for the gradient
+  ) +
+  # Add species line plot
+  # Add species line plot without color
+  geom_line(
+    data = data[c(1:695),],
+    aes(x = x_values, y = ncell, group = 1),
+    colour = "black"  # Line color set to black
+  ) +
+  scale_fill_gradient(
+    low = "yellow", high = "blue", name = "Dissolved Oxygen"
+  ) +  # Gradient for background
+  labs(
+    x = "1000 years before present",
+    y = "Number of cells",
+    title = expression(italic("Mauritiella pumila"))
+  ) +  # Axis labels
+  theme_bw() +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(colour = "black"),
+        strip.background = element_blank(),  # Removes grey background of facet titles
+        strip.text = element_text(face = "italic", size = 14),  # Italicizes facet titles
+        plot.title = element_blank()  # Removes main plot title
+  ) +
+  facet_wrap(~sp, scales = "free_y", ncol = 1)  # Arrange plots in one column
+
+dev.off()
+
+######################## no colored lines and facets title
+ggplot() +
+  # Add background gradient using dissolved oxygen data (ox2)
+  geom_tile(
+    data = dataox,
+    aes(x = Time, y = 0, fill = d18),  # Use `d18` for the color gradient
+    height = Inf,  # Extend tile vertically to cover the entire plot
+    alpha = 0.2    # Transparency for the gradient
+  ) +
+  # Add species line plot without color
+  geom_line(
+    data = data_fossil,
+    aes(x = x_values, y = ncell, group = 1),
+    colour = "black"  # Line color set to black
+  ) +
+  scale_fill_gradient(
+    low = "yellow", high = "blue", name = "Dissolved Oxygen"
+  ) +  # Gradient for background
+  labs(
+    x = "1000 years before present",
+    y = "Number of cells"
+  ) +  # Axis labels
+  theme_bw() +
+  theme(
+    panel.border = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(colour = "black"),
+    strip.background = element_blank(),  # Removes grey background of facet titles
+    strip.text = element_text(face = "italic", size = 12),  # Italicizes facet titles
+    plot.title = element_blank()  # Removes main plot title
+  ) +
+  facet_wrap(~sp, scales = "free_y", nrow = 1) +
+  coord_flip()# Arrange plots in one column
+
+#################### CHATGPT
+# Load necessary packages
+library(ggplot2)
+library(ggpubr)
+library(dplyr)
+
+# Initialize an empty list to store the individual plots
+plot_list <- list()
+
+# Loop through each unique species in the 'data' dataframe
+for(species in unique(data$sp)) {
+  
+  # Subset the data for the current species
+  species_data <- data[data$sp == species, ]
+  species_ox2 <- ox2  # Assuming ox2 is already aligned with species in data
+  
+  # Create the plot for the current species
+  plot_data <- ggplot(species_data, aes(x = x_values, y = ncell, group = 1)) +
+    geom_line(aes(x = x_values, y = ncell, group = 1)) +  # Line plot
+    labs(x = "1000 years before present", y = "Number of cells", title = expression(italic(species))) +  # Axis labels
+    theme_bw() +
+    theme(
+      panel.border = element_blank(), 
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(), 
+      axis.line = element_line(colour = "black"),
+      strip.background = element_blank(),  # Removes grey background of facet titles
+      strip.text = element_text(face = "italic", size = 12),  # Italicizes facet titles
+      plot.title = element_blank()  # Removes main plot title
+    ) +
+    # Add background gradient using dissolved oxygen data (ox2)
+    geom_tile(
+      data = species_ox2, 
+      aes(x = Time, y = 0, fill = d18),  # Use `d18` for the color gradient
+      height = Inf,  # Extend tile vertically to cover the entire plot
+      alpha = 0.2    # Transparency for the gradient
+    ) +
+    # Add species line plot
+    geom_line(
+      aes(x = x_values, y = ncell, group = 1),
+      colour = "black"  # Line color set to black
+    ) +
+    scale_fill_gradient(
+      low = "yellow", high = "blue", name = "Dissolved Oxygen"
+    ) +  # Gradient for background
+    facet_wrap(~sp, scales = "free_x", nrow = 1) +  # Facets for species
+    coord_flip()  # Flip coordinates to switch X and Y axes
+  
+  # Store the plot in the list
+  plot_list[[species]] <- plot_data
+}
+
+# Combine all plots into a single image using ggarrange from ggpubr
+final_plot <- ggarrange(plotlist = plot_list, ncol = 2, nrow = 1)  # Adjust ncol, nrow based on the number of species
+
+
+plot_list[1]
+# Display the final plot
+print(final_plot[1])
+
+
+
+################################## changes in legend position and font size
+# Load necessary packages
+library(ggplot2)
+library(ggpubr)
+library(dplyr)
+
+# Initialize an empty list to store the individual plots
+plot_list <- list()
+
+# Loop through each unique species in the 'data' dataframe
+for(species in unique(data$sp)) {
+  
+  # Subset the data for the current species
+  species_data <- data[data$sp == species, ]
+  species_ox2 <- ox2  # Assuming ox2 is already aligned with species in data
+  
+  # Create the plot for the current species
+  plot_data <- ggplot(species_data, aes(x = x_values, y = ncell, group = 1)) +
+    geom_tile(
+      data = species_ox2, 
+      aes(x = Time, y = 0, fill = d18),  
+      height = Inf,
+      alpha = 0.2    
+    ) +
+    geom_line(aes(x = x_values, y = ncell, group = 1), colour = "black") +  
+    labs(
+      x = "1000 years before present",
+      y = "Number of cells",
+      title = expression(italic(species))
+    ) +
+    scale_fill_gradient(
+      low = "yellow", high = "blue", name = "Dissolved Oxygen"
+    ) +
+    # Apply comma to X-axis only
+    scale_x_continuous(labels = scales::comma) +   # labels = scales::scientific
+    # Apply scientific notation in Y-axis 
+    scale_y_continuous(labels = scales::scientific) + # labels = scales::comma
+    theme_bw() +
+    theme(
+      panel.border = element_blank(), 
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(), 
+      axis.line = element_line(colour = "black"),
+      strip.background = element_blank(),
+      strip.text = element_text(face = "italic", size = 12),
+      plot.title = element_blank(),
+      
+      # Increase font size of tick labels
+      axis.text = element_text(size = 12),
+      
+      # Increase the distance between axis labels and tick labels
+      axis.title.x = element_text(margin = margin(t = 15)),  # Top margin for X-axis label
+      axis.title.y = element_text(margin = margin(r = 15)),  # Right margin for Y-axis label
+      
+      # Add margins around the entire plot
+      plot.margin = margin(t = 20, r = 20, b = 20, l = 20),  # Top, Right, Bottom, Left
+      
+      # Move the legend to the bottom with horizontal orientation
+      legend.position = "bottom",
+      legend.direction = "horizontal",
+      legend.title = element_text(size = 12),
+      legend.text = element_text(size = 10)
+    ) +
+    facet_wrap(~sp, scales = "free_x", nrow = 1) +
+    coord_flip()  
+  
+  # Store the plot in the list
+  plot_list[[species]] <- plot_data
+}
+
+# Combine all plots into a single image using ggarrange from ggpubr
+final_plot <- ggarrange(plotlist = plot_list, ncol = 2, nrow = 1, common.legend = TRUE, legend = "bottom")
+
+# Display the final plot
+print(final_plot[4])
+
