@@ -105,13 +105,13 @@ ggplot() +
   facet_wrap(~sp, scales = "free_y", nrow = 1) +
   coord_flip()# Arrange plots in one column
 
-#################### CHATGPT
-# Load necessary packages
+#####################################################################
+
 library(ggplot2)
 library(ggpubr)
 library(dplyr)
 
-# Initialize an empty list to store the individual plots
+# empty list to store the individual plots
 plot_list <- list()
 
 # Loop through each unique species in the 'data' dataframe
