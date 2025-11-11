@@ -1,0 +1,77 @@
+########################################################################################
+########################################################################################
+################################## Graficos ##########################################
+
+library(performance)
+library(visreg)
+library(ggplot2)
+#install.packages("sf")
+library(sf)
+# install.packages("dplyr")
+library(dplyr)
+# install.packages("giscoR")
+library(giscoR)
+
+visreg(m4, "NPF_5km", line = list(col = 'black', size= 0.5, alpha=0.3),
+       type = "conditional", partial = T, by="sz", scale = "response",
+       ylab= "abd_totância de espécies no núcleo", 
+       xlab= "Número de fragmentos de floresta (5km)", gg=T) + 
+  theme_classic() + geom_point(size=1.5) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        #plot.margin = margin(1,1,3,5, "cm"),
+        axis.title = element_text(size = 15), text=element_text(family="serif"),
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15)) #,
+#axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+#axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0))))
+
+
+
+visreg(m1, "SHN_6km", line = list(col = 'black', size= 0.5, alpha=0.3),
+       type = "conditional", partial = T,
+       ylab= "Species Richness", 
+       xlab= "Compositional heterogeneity (5km)", gg=T) + 
+  theme_classic() + geom_point(size=1.5) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        #plot.margin = margin(1,1,3,5, "cm"),
+        axis.title = element_text(size = 15), text=element_text(family="serif"),
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15)) #,
+#axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+#axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0))))
+
+
+visreg(m5, "SPF_500m", line = list(col = 'black', size= 0.5, alpha=0.3),
+       type = "conditional", partial = T, by="sz",
+       ylab= "Species Richness", 
+       xlab= "Forest patch shape", gg=T) + 
+  theme_classic() + geom_point(size=1.5) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        #plot.margin = margin(1,1,3,5, "cm"),
+        axis.title = element_text(size = 15), text=element_text(family="serif"),
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15)) #,
+#axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)),
+#axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0))))
+
+core_ggpredict<-ggPredict(m4, se=T)
+
+
+
+core_ggpredict + theme_classic() + 
+  labs (x="Heterogeneidade na composição da paisagem (6km)", 
+        y= "Riqueza de espécies em núcleos de habitat [log(X+1)]") +
+  theme(plot.margin = margin(2, 2, 2, 2, "cm"), panel.spacing = unit (2, "lines"),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.title=element_blank(),
+        strip.text.x = element_text(size = 20),
+        axis.title = element_text(size = 17), text=element_text(family="serif"),
+        axis.text.x = element_text(size = 17),
+        axis.text.y = element_text(size = 17), 
+        axis.title.x = element_text(vjust = -4),
+        axis.title.y = element_text(vjust = +3)) +
+  facet_wrap(~fito)+
+  scale_color_manual(labels= c ("Plantio", "Vazio"), values=c("#006400", "#E69F00")) +
+  scale_fill_manual(values=c("#006400", "#E69F00")) + 
+  guides(fill = F)
